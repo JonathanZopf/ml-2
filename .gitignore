@@ -1,3 +1,6 @@
+### Custom ####
+src/main/resources/file_paths
+
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar
