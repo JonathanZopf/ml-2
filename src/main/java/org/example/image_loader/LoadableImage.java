@@ -2,10 +2,19 @@ package org.example.image_loader;
 
 import org.example.SignClassification;
 import org.opencv.core.Mat;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
+
 public record LoadableImage(String path, SignClassification classification) implements Comparable<LoadableImage> {
 
     public Mat loadMaterial() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        try {
+            Mat image = Imgcodecs.imread(path);
+            Imgproc.cvtColor(image, image, Imgproc.COLOR_BGR2RGBA);
+            return image;
+        } catch (UnsatisfiedLinkError e) {
+            throw new RuntimeException("Could not load image from path: " + path, e);
+        }
     }
 
     @Override
