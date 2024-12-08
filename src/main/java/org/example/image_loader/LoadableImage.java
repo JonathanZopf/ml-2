@@ -1,6 +1,7 @@
 package org.example.image_loader;
 
 import org.example.SignClassification;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
@@ -10,6 +11,9 @@ public record LoadableImage(String path, SignClassification classification) impl
     public Mat loadMaterial() {
         try {
             Mat image = Imgcodecs.imread(path);
+            if (image.empty()) {
+                return Mat.zeros(1, 1,  CvType.CV_8UC4);
+            }
             Imgproc.cvtColor(image, image, Imgproc.COLOR_BGR2RGBA);
             return image;
         } catch (UnsatisfiedLinkError e) {
