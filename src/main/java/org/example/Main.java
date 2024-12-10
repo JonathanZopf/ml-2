@@ -31,8 +31,8 @@ public class Main {
     final static int SCALE_TARGET_PIXEL_SIZE_COLS = 80;
 
     public static void main(String[] args) {
-        int imagesForTraining = 1000;
-        int imagesForTesting = 100;
+        int imagesForTraining = 10;
+        int imagesForTesting = 10;
 
         // Initialize OpenCV
         OpenCV.loadShared();
@@ -40,6 +40,10 @@ public class Main {
         // Load Images
         ImageLoader loader = new ImageLoader(imagesForTraining, imagesForTesting);
         ImageLoaderResult loaderResult = loader.loadImages();
+
+        for (LoadableImage image : loaderResult.imagesForTraining()) {
+            System.out.println(image.path());
+        }
 
         // Prepare Training and Testing Data
         // DefaultDataSetBuilder is shared between training and testing data because most of the parameters are the same
@@ -58,7 +62,7 @@ public class Main {
                 .withHiddenLayerSize(128)
                 .withHiddenLayerActivation(Activation.RELU)
                 .withOutputLayerActivation(Activation.SOFTMAX)
-                .withNumEpochs(1000)
+                .withNumEpochs(100)
                 .withLogFrequency(10)
                 .buildAndTrain(trainingData);
 

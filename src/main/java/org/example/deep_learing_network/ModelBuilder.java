@@ -8,6 +8,7 @@ import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.dataset.DataSet;
+import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 /**
@@ -131,6 +132,7 @@ public class ModelBuilder {
         }
 
         // Build the network configuration
+        Nd4j.getRandom().setSeed(123);
         MultiLayerConfiguration config = new NeuralNetConfiguration.Builder()
                 .updater(new org.nd4j.linalg.learning.config.Adam(learningRate))
                 .list()
