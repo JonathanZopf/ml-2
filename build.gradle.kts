@@ -17,6 +17,7 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation("org.deeplearning4j:deeplearning4j-core:1.0.0-M2.1")
     implementation("org.nd4j:nd4j-native-platform:1.0.0-M2.1")
+    implementation("com.google.code.gson:gson:2.11.0")
 }
 
 tasks.test {
