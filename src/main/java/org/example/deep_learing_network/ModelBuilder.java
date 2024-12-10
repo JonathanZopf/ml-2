@@ -132,7 +132,7 @@ public class ModelBuilder {
 
         // Build the network configuration
         MultiLayerConfiguration config = new NeuralNetConfiguration.Builder()
-                .updater(new org.nd4j.linalg.learning.config.Adam(learningRate)) // Optimizer
+                .updater(new org.nd4j.linalg.learning.config.Adam(learningRate))
                 .list()
                 .layer(new DenseLayer.Builder()
                         .nIn(inputSize)
@@ -153,6 +153,7 @@ public class ModelBuilder {
 
         // Train the model
         for (int i = 0; i < numEpochs; i++) {
+            System.out.println("Fitting epoch " + i + " of " + numEpochs + " of the model");
             model.fit(trainingData);
         }
 

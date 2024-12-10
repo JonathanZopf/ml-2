@@ -1,11 +1,13 @@
 package org.example.deep_learing_network;
 
+import org.example.ImageCropper;
 import org.example.ImageExtractor;
 import org.example.PixelValues;
 import org.example.image_loader.LoadableImage;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.factory.Nd4j;
+import org.opencv.core.Mat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -100,7 +102,16 @@ public class DataSetBuilder {
         ImageExtractor extractor = new ImageExtractor(targetPixelRows, targetPixelCols);
 
         for (int i = 0; i < numExamples; i++) {
-            List<PixelValues> feature = extractor.scaleAndExtractFeaturesFromImage(images.get(i).loadMaterial());
+            System.out.println("Processing image " + i + " of " + numExamples + " to build the dataset");
+            List<PixelValues> feature;
+            try {
+                ImageCropper cropper = new ImageCropper();
+                Mat croppedImage = cropper.cropSign(images.get(i).loadMaterial());
+                feature = extractor.scaleAndExtractFeaturesFromImage(croppedImage);
+            } catch (IllegalStateException e) {
+                System.out.println("Could not extract features from image, likely due to cropping error " + images.get(i).path());
+                continue;
+            }
 
             // Flatten the features
             float[] flatFeature = new float[inputSize];

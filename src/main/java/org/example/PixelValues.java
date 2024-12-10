@@ -39,6 +39,17 @@ public class PixelValues {
             (float) normalizedAlpha
         );
     }
+
+    @Override
+    public String toString() {
+        return "PixelValues{" +
+            "normalizedRed=" + normalizedRed +
+            ", normalizedGreen=" + normalizedGreen +
+            ", normalizedBlue=" + normalizedBlue +
+            ", normalizedAlpha=" + normalizedAlpha +
+            '}';
+    }
+
     public static PixelValues fromUnormalizedArray(double[] pixelArray) {
         return new PixelValues(
             pixelArray[0] / 255.0,

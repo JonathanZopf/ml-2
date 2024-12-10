@@ -31,8 +31,8 @@ public class Main {
     final static int SCALE_TARGET_PIXEL_SIZE_COLS = 80;
 
     public static void main(String[] args) {
-        int imagesForTraining = 300;
-        int imagesForTesting = 30;
+        int imagesForTraining = 1000;
+        int imagesForTesting = 100;
 
         // Initialize OpenCV
         OpenCV.loadShared();
@@ -52,13 +52,13 @@ public class Main {
 
         // Define and Train the Neural Network
         MultiLayerNetwork model = new ModelBuilder()
-                .withInputSize(SCALE_TARGET_PIXEL_SIZE_ROWS * SCALE_TARGET_PIXEL_SIZE_COLS * 4) // RGBA channels
+                .withInputSize(SCALE_TARGET_PIXEL_SIZE_ROWS * SCALE_TARGET_PIXEL_SIZE_COLS * 4)
                 .withOutputSize(SignClassification.values().length)
                 .withLearningRate(0.01)
                 .withHiddenLayerSize(128)
                 .withHiddenLayerActivation(Activation.RELU)
                 .withOutputLayerActivation(Activation.SOFTMAX)
-                .withNumEpochs(500)
+                .withNumEpochs(1000)
                 .withLogFrequency(10)
                 .buildAndTrain(trainingData);
 

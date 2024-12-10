@@ -75,6 +75,7 @@ public class ImageLoader {
             return Files.walk(directory.toPath())
                     .filter(Files::isRegularFile)
                     .map(path -> path.toAbsolutePath().toString())
+                    .filter(path -> path.endsWith(".jpg") || path.endsWith(".bmp"))
                     .collect(Collectors.toList());
         } catch (IOException e) {
             throw new RuntimeException("Error reading files from directory: " + directory.getAbsolutePath(), e);
