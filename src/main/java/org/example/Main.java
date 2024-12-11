@@ -78,7 +78,7 @@ public class Main {
                 .withHiddenLayerSizes(hiddenLayerSize)
                 .withHiddenLayerActivation(Activation.RELU)
                 .withOutputLayerActivation(Activation.SOFTMAX)
-                .withNumEpochs(5)
+                .withNumEpochs(100)
                 .withLogFrequency(10)
                 .buildAndTrain(trainingData);
 
