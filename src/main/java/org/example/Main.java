@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class Main {
     private static final int SCALE_TARGET_PIXEL_SIZE_ROWS = 60;//60
     private static final int SCALE_TARGET_PIXEL_SIZE_COLS = 80;//80
-    private static final boolean REGENERATE_DATA = true; // Set to false to load datasets from disk
+    private static final boolean REGENERATE_DATA = false; // Set to false to load datasets from disk
 
     public static void main(String[] args) {
         //int imagesForTraining = 10000;
@@ -76,7 +76,7 @@ public class Main {
         MultiLayerNetwork model = new ModelBuilder()
                 .withInputSize(SCALE_TARGET_PIXEL_SIZE_ROWS * SCALE_TARGET_PIXEL_SIZE_COLS * 4)
                 .withOutputSize(SignClassification.values().length)
-                .withLearningRate(0.01)
+                .withLearningRate(0.0001)
                 .withHiddenLayerSizes(hiddenLayerSize)
                 .withHiddenLayerActivation(Activation.RELU)
                 .withOutputLayerActivation(Activation.SOFTMAX)
