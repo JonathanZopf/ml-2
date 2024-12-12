@@ -30,6 +30,7 @@ public class ModelBuilder {
     private int logFrequency = 10;
     private Activation hiddenLayerActivation = Activation.RELU;
     private Activation outputLayerActivation = Activation.SOFTMAX;
+    private long seed = 1; // Default seed
 
     /**
      * Sets the input size (number of features) for the model.
@@ -120,6 +121,17 @@ public class ModelBuilder {
     }
 
     /**
+     * Sets the random seed for reproducibility.
+     *
+     * @param seed The seed value for random number generation.
+     * @return The current instance of {@link ModelBuilder} for chaining.
+     */
+    public ModelBuilder withSeed(long seed) {
+        this.seed = seed;
+        return this;
+    }
+
+    /**
      * Builds and trains a {@link MultiLayerNetwork} using the specified configuration.
      *
      * @param trainingData The dataset used to train the model.
@@ -127,6 +139,7 @@ public class ModelBuilder {
      * @throws IllegalStateException if required fields (input size or output size) are not set.
      */
     public MultiLayerNetwork buildAndTrain(DataSet trainingData) {
+        Nd4j.getRandom().setSeed(seed);
         if (inputSize <= 0) {
             throw new IllegalStateException("Input size must be set and greater than 0. Use withInputSize() to specify it.");
         }
@@ -137,10 +150,9 @@ public class ModelBuilder {
             throw new IllegalStateException("Hidden layer sizes must be set and non-empty. Use withHiddenLayerSizes() to specify them.");
         }
 
-        Nd4j.getRandom().setSeed(124);
-
         // Netzwerk-Konfiguration erstellen
         NeuralNetConfiguration.ListBuilder listBuilder = new NeuralNetConfiguration.Builder()
+                .seed(seed) // Seed für die Netzwerk-Konfiguration
                 .updater(new org.nd4j.linalg.learning.config.Adam(learningRate))
                 .list();
 

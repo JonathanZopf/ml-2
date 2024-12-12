@@ -20,13 +20,15 @@ import java.util.stream.Collectors;
  * Main class for training and evaluating a deep learning model for sign classification.
  */
 public class Main {
-    private static final int SCALE_TARGET_PIXEL_SIZE_ROWS = 60;
-    private static final int SCALE_TARGET_PIXEL_SIZE_COLS = 80;
-    private static final boolean REGENERATE_DATA = false; // Set to false to load datasets from disk
+    private static final int SCALE_TARGET_PIXEL_SIZE_ROWS = 60;//60
+    private static final int SCALE_TARGET_PIXEL_SIZE_COLS = 80;//80
+    private static final boolean REGENERATE_DATA = true; // Set to false to load datasets from disk
 
     public static void main(String[] args) {
-        int imagesForTraining = 10000;
-        int imagesForTesting = 1000;
+        //int imagesForTraining = 10000;
+        //int imagesForTesting = 1000;
+        int imagesForTraining = 35000;
+        int imagesForTesting = 3500;
 
         // Initialize OpenCV
         OpenCV.loadShared();
@@ -70,7 +72,7 @@ public class Main {
         }
 
         // Define and Train the Neural Network
-        List<Integer> hiddenLayerSize = Arrays.asList(750, 500, 250); // Beispiel mit 3 Hidden Layers
+        List<Integer> hiddenLayerSize = Arrays.asList(500, 250, 128, 64);
         MultiLayerNetwork model = new ModelBuilder()
                 .withInputSize(SCALE_TARGET_PIXEL_SIZE_ROWS * SCALE_TARGET_PIXEL_SIZE_COLS * 4)
                 .withOutputSize(SignClassification.values().length)
