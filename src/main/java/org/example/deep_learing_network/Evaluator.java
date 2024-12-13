@@ -2,6 +2,7 @@ package org.example.deep_learing_network;
 
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.example.SignClassification;
+import org.nd4j.evaluation.classification.Evaluation;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 
@@ -50,6 +51,14 @@ public class Evaluator implements DataSetIterator {
     public void evaluateModel() {
         var eval = model.evaluate(this); // Uses the current Evaluator instance as a DataSetIterator
         System.out.println(eval.stats()); // Prints evaluation statistics such as accuracy and F1 score
+    }
+
+    /**
+     * Evaluates the performance of the neural network model on the provided testing dataset.
+     * @return An Evaluation object of the framework
+     */
+    public Evaluation getEvaluationResult() {
+        return model.evaluate(this);
     }
 
     /**

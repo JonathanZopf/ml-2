@@ -31,13 +31,13 @@ import javax.xml.crypto.Data;
  * Main class for training and evaluating a deep learning model for sign classification.
  */
 public class Main {
-    private static final int SCALE_TARGET_PIXEL_SIZE_ROWS = 60;
-    private static final int SCALE_TARGET_PIXEL_SIZE_COLS = 80;
+    public static final int SCALE_TARGET_PIXEL_SIZE_ROWS = 60;
+    public static final int SCALE_TARGET_PIXEL_SIZE_COLS = 80;
     private static final boolean REGENERATE_DATA = true; // Set to false to load datasets from disk
 
     public static void main(String[] args) {
-        int imagesForTraining = 10;
-        int imagesForTesting = 10;
+        int imagesForTraining = 1000;
+        int imagesForTesting = 100;
 
         // Initialize OpenCV
         OpenCV.loadShared();
@@ -84,7 +84,7 @@ public class Main {
         MultiLayerNetwork model = new ModelBuilder()
                 .withInputSize(SCALE_TARGET_PIXEL_SIZE_ROWS * SCALE_TARGET_PIXEL_SIZE_COLS * 4)
                 .withOutputSize(SignClassification.values().length)
-                .withLearningRate(0.01)
+                .withLearningRate(0.001)
                 .withHiddenLayerSize(128)
                 .withHiddenLayerActivation(Activation.RELU)
                 .withOutputLayerActivation(Activation.SOFTMAX)
