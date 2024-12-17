@@ -1,5 +1,7 @@
 package org.example.deep_learing_network;
 
+import kotlin.Pair;
+import org.deeplearning4j.nn.conf.GradientNormalization;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.layers.DenseLayer;
@@ -11,6 +13,9 @@ import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * A builder class for constructing and training a {@link MultiLayerNetwork} for machine learning tasks.
  *
@@ -19,14 +24,15 @@ import org.nd4j.linalg.lossfunctions.LossFunctions;
  */
 public class ModelBuilder {
 
-    private int inputSize;
-    private int outputSize;
-    private double learningRate = 0.01;
-    private int hiddenLayerSize = 128;
-    private int numEpochs = 500;
-    private int logFrequency = 10;
-    private Activation hiddenLayerActivation = Activation.RELU;
-    private Activation outputLayerActivation = Activation.SOFTMAX;
+    protected int inputSize;
+    protected int outputSize;
+    protected double learningRate = 0.01;
+    protected List<Pair<Integer, Activation>> hiddenLayerConfig;
+    protected int numEpochs = 500;
+    protected int logFrequency = 10;
+    protected Activation outputLayerActivation = Activation.SOFTMAX;
+    protected long seed = 1; // Default seed
+
 
     /**
      * Sets the input size (number of features) for the model.
@@ -62,24 +68,13 @@ public class ModelBuilder {
     }
 
     /**
-     * Sets the number of neurons in the hidden layer.
-     *
-     * @param hiddenLayerSize The size of the hidden layer.
-     * @return The current instance of {@link ModelBuilder} for chaining.
+     * Sets the configuration for the hidden layers of the model.
+     * Each pair represents the size of the layer and the activation function to use.
+     * The first element of the list represents the first hidden layer, the second element the second hidden layer, and so on.
+     * The last element of the list represents the last hidden layer before the output layer.
      */
-    public ModelBuilder withHiddenLayerSize(int hiddenLayerSize) {
-        this.hiddenLayerSize = hiddenLayerSize;
-        return this;
-    }
-
-    /**
-     * Configures the activation function for the hidden layer.
-     *
-     * @param activation The activation function to use for the hidden layer.
-     * @return The current instance of {@link ModelBuilder} for chaining.
-     */
-    public ModelBuilder withHiddenLayerActivation(Activation activation) {
-        this.hiddenLayerActivation = activation;
+    public ModelBuilder withHiddenLayerConfig(List<Pair<Integer, Activation>> hiddenLayerSize) {
+        this.hiddenLayerConfig = hiddenLayerSize;
         return this;
     }
 
@@ -117,6 +112,17 @@ public class ModelBuilder {
     }
 
     /**
+     * Sets the random seed for reproducibility.
+     *
+     * @param seed The seed value for random number generation.
+     * @return The current instance of {@link ModelBuilder} for chaining.
+     */
+    public ModelBuilder withSeed(long seed) {
+        this.seed = seed;
+        return this;
+    }
+
+    /**
      * Builds and trains a {@link MultiLayerNetwork} using the specified configuration.
      *
      * @param trainingData The dataset used to train the model.
@@ -124,38 +130,52 @@ public class ModelBuilder {
      * @throws IllegalStateException if required fields (input size or output size) are not set.
      */
     public MultiLayerNetwork buildAndTrain(DataSet trainingData) {
+        Nd4j.getRandom().setSeed(seed);
         if (inputSize <= 0) {
             throw new IllegalStateException("Input size must be set and greater than 0. Use withInputSize() to specify it.");
         }
         if (outputSize <= 0) {
             throw new IllegalStateException("Output size must be set and greater than 0. Use withOutputSize() to specify it.");
         }
+        if (hiddenLayerConfig == null || hiddenLayerConfig.isEmpty()) {
+            throw new IllegalStateException("Hidden layer configuration must be set. Use withHiddenLayerConfig() to specify it.");
+        }
 
-        // Build the network configuration
-        Nd4j.getRandom().setSeed(123);
-        MultiLayerConfiguration config = new NeuralNetConfiguration.Builder()
+        // Netzwerk-Konfiguration erstellen
+        NeuralNetConfiguration.ListBuilder listBuilder = new NeuralNetConfiguration.Builder()
+                .seed(seed) // Seed für die Netzwerk-Konfiguration
                 .updater(new org.nd4j.linalg.learning.config.Adam(learningRate))
-                .list()
-                .layer(new DenseLayer.Builder()
-                        .nIn(inputSize)
-                        .nOut(hiddenLayerSize)
-                        .activation(hiddenLayerActivation)
-                        .build())
-                .layer(new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
-                        .nIn(hiddenLayerSize)
-                        .nOut(outputSize)
-                        .activation(outputLayerActivation)
-                        .build())
-                .build();
+                .list();
 
-        // Initialize the network
+        int prevLayerSize = inputSize; // Start mit der Eingabegröße
+
+        // Hidden-Layer hinzufügen
+        for (var layer : hiddenLayerConfig) {
+            listBuilder.layer(new DenseLayer.Builder()
+                    .nIn(prevLayerSize) // Größe der vorherigen Schicht
+                    .nOut(layer.getFirst())    // Größe der aktuellen Schicht
+                    .activation(layer.getSecond())
+                    .build());
+            prevLayerSize = layer.getFirst(); // Update für die nächste Schicht
+        }
+
+        // Output-Layer hinzufügen
+        listBuilder.layer(new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
+                .nIn(prevLayerSize) // Größe der letzten Hidden-Layer
+                .nOut(outputSize)  // Anzahl der Ausgabeklassen
+                .activation(outputLayerActivation)
+                .build());
+
+
+        MultiLayerConfiguration config = listBuilder.build();
+
+        // Netzwerk initialisieren
         MultiLayerNetwork model = new MultiLayerNetwork(config);
         model.init();
         model.setListeners(new ScoreIterationListener(logFrequency));
 
         // Train the model
         for (int i = 0; i < numEpochs; i++) {
-            System.out.println("Fitting epoch " + i + " of " + numEpochs + " of the model");
             model.fit(trainingData);
         }
 

@@ -1,43 +1,36 @@
 package org.example;
 
+import kotlin.Pair;
 import nu.pattern.OpenCV;
-import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
-import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
-import org.deeplearning4j.nn.conf.layers.DenseLayer;
-import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
-import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
+import org.deeplearning4j.nn.workspace.LayerWorkspaceMgr;
 import org.example.deep_learing_network.DataSetBuilder;
 import org.example.deep_learing_network.Evaluator;
 import org.example.deep_learing_network.ModelBuilder;
+import org.example.deep_learing_network.ModelBuilderWithParametricSigmoid;
 import org.example.image_loader.ImageLoader;
 import org.example.image_loader.ImageLoaderResult;
 import org.example.image_loader.LoadableImage;
+import org.nd4j.evaluation.classification.Evaluation;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.dataset.DataSet;
-import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
-import org.nd4j.linalg.dataset.DataSet;
-import org.opencv.core.Core;
-
-import javax.xml.crypto.Data;
 /**
  * Main class for training and evaluating a deep learning model for sign classification.
  */
 public class Main {
-    public static final int SCALE_TARGET_PIXEL_SIZE_ROWS = 60;
-    public static final int SCALE_TARGET_PIXEL_SIZE_COLS = 80;
-    private static final boolean REGENERATE_DATA = true; // Set to false to load datasets from disk
+    private static final int SCALE_TARGET_PIXEL_SIZE_ROWS = 60;
+    private static final int SCALE_TARGET_PIXEL_SIZE_COLS = 80;
+    private static final boolean REGENERATE_DATA = false; // Set to false to load datasets from disk
 
     public static void main(String[] args) {
-        int imagesForTraining = 1000;
-        int imagesForTesting = 100;
+        int imagesForTraining = 50;
+        int imagesForTesting = 10;
 
         // Initialize OpenCV
         OpenCV.loadShared();
@@ -68,9 +61,9 @@ public class Main {
             testingData = defaultDataSetBuilder.withImages(loaderResult.imagesForTesting()).build();
 
             // Save datasets to disk
-            trainingData.save(trainingDataFile);
+            /*trainingData.save(trainingDataFile);
             testingData.save(testingDataFile);
-            System.out.println("Datasets saved to disk at: " + parentFolderLocation);
+            System.out.println("Datasets saved to disk at: " + parentFolderLocation);*/
         } else {
             // Load datasets from disk
             trainingData = new DataSet();
@@ -80,21 +73,55 @@ public class Main {
             System.out.println("Datasets loaded from disk at: " + parentFolderLocation);
         }
 
-        // Define and Train the Neural Network
-        MultiLayerNetwork model = new ModelBuilder()
+        ModelBuilder defaultModelBuilder = new ModelBuilder()
                 .withInputSize(SCALE_TARGET_PIXEL_SIZE_ROWS * SCALE_TARGET_PIXEL_SIZE_COLS * 4)
                 .withOutputSize(SignClassification.values().length)
-                .withLearningRate(0.001)
-                .withHiddenLayerSize(128)
-                .withHiddenLayerActivation(Activation.RELU)
                 .withOutputLayerActivation(Activation.SOFTMAX)
+                .withLearningRate(0.00001)
                 .withNumEpochs(100)
-                .withLogFrequency(10)
-                .buildAndTrain(trainingData);
+                .withLogFrequency(10);
 
-        // Evaluate the Model
-        Evaluator evaluator = new Evaluator(model, testingData);
-        evaluator.evaluateModel();
+
+        TestDriver testDriver = new TestDriver(new TestFunction() {
+            @Override
+            public Evaluation testDetermineBestHiddenLayersActivationFunction(Activation activationFunction) {
+                MultiLayerNetwork model = defaultModelBuilder.withHiddenLayerConfig(List.of(new Pair<Integer, Activation>(500, activationFunction),
+                                new Pair<Integer, Activation>(250, activationFunction),
+                                new Pair<Integer, Activation>(128, activationFunction),
+                                new Pair<Integer, Activation>(64, activationFunction)))
+                        .buildAndTrain(trainingData);
+
+                // Evaluate the Model
+                Evaluator evaluator = new Evaluator(model, testingData);
+                return evaluator.getEvaluationResult();
+            }
+
+            @Override
+            public Evaluation testDetermineBestHiddenLayersActivationFunction(List<Pair<Integer, Activation>> hiddenLayerConfig) {
+                MultiLayerNetwork model = defaultModelBuilder.withHiddenLayerConfig(hiddenLayerConfig)
+                        .buildAndTrain(trainingData);
+
+                // Evaluate the Model
+                Evaluator evaluator = new Evaluator(model, testingData);
+                return evaluator.getEvaluationResult();
+            }
+
+            @Override
+            public Evaluation testParameterAdjustmentInSigmoidFunction(double parameter) {
+                MultiLayerNetwork model = ModelBuilderWithParametricSigmoid.createFromDefaultModelBuilder(defaultModelBuilder.withHiddenLayerConfig(
+                        List.of(new Pair<>(500, Activation.SIGMOID),
+                                new Pair<>(250, Activation.SIGMOID),
+                                new Pair<>(128, Activation.SIGMOID),
+                                new Pair<>(64, Activation.SIGMOID))
+                )).withAlpha(parameter).buildAndTrain(trainingData);
+                Evaluator evaluator = new Evaluator(model, testingData);
+                return evaluator.getEvaluationResult();
+            }
+        });
+
+        testDriver.determineBestHiddenLayersActivationFunction();
+        testDriver.testEffectivityOfDifferentHiddenLayerActivationFunction();
+        testDriver.testParameterAdjustmentInSigmoidFunction();
     }
 
     /**
