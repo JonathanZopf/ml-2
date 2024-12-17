@@ -119,8 +119,8 @@ public class Main {
             }
         });
 
-        //testDriver.determineBestHiddenLayersActivationFunction();
-        //testDriver.testEffectivityOfDifferentHiddenLayerActivationFunction();
+        testDriver.determineBestHiddenLayersActivationFunction();
+        testDriver.testEffectivityOfDifferentHiddenLayerActivationFunction();
         testDriver.testParameterAdjustmentInSigmoidFunction();
     }
 
