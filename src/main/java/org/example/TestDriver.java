@@ -11,6 +11,7 @@ import org.nd4j.linalg.ops.transforms.Transforms;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class TestDriver {
 /**
@@ -123,9 +124,12 @@ public void testEffectivityOfDifferentHiddenLayerActivationFunction() {
 
 
     public void testParameterAdjustmentInSigmoidFunction() {
-        List<Double> parameters = List.of(0.25, 0.5, 1.0, 2.0, 3.0, 4.0, 5.0, 10.0);
+        List<Double> factors = List.of(1.0, 1.5, 2.0, 3.0, 5.0, 10.0, 20.0);
+        List<Double> smallParams = factors.stream().map(f -> 1.0 / f).toList();
+        List<Double> uniqueParams = Stream.concat(smallParams.stream(), factors.stream()).distinct().sorted().toList();
+        System.out.println("Unique Parameters: " + uniqueParams);
         List<Pair<Double, Evaluation>> results = new ArrayList<>();
-        for (double parameter : parameters) {
+        for (double parameter : uniqueParams) {
             System.out.println("Testing parameter: " + parameter);
             results.add(new Pair<>(parameter, testFunction.testParameterAdjustmentInSigmoidFunction(parameter)));
         }

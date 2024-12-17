@@ -119,15 +119,15 @@ public class Main {
             }
         });
 
-        testDriver.determineBestHiddenLayersActivationFunction();
-        testDriver.testEffectivityOfDifferentHiddenLayerActivationFunction();
+        //testDriver.determineBestHiddenLayersActivationFunction();
+        //testDriver.testEffectivityOfDifferentHiddenLayerActivationFunction();
         testDriver.testParameterAdjustmentInSigmoidFunction();
     }
 
     /**
      * Loads the parent folder location from the specified file.
      *
-     * @param resourcePath Path to the resource file containing the parent folder location.
+     * @param resourcePath Path tos the resource file containing the parent folder location.
      * @return The parent folder location as a string.
      */
     private static String loadParentFolderLocation(String resourcePath) {
