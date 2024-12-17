@@ -61,9 +61,9 @@ public class Main {
             testingData = defaultDataSetBuilder.withImages(loaderResult.imagesForTesting()).build();
 
             // Save datasets to disk
-            /*trainingData.save(trainingDataFile);
+            trainingData.save(trainingDataFile);
             testingData.save(testingDataFile);
-            System.out.println("Datasets saved to disk at: " + parentFolderLocation);*/
+            System.out.println("Datasets saved to disk at: " + parentFolderLocation);
         } else {
             // Load datasets from disk
             trainingData = new DataSet();
@@ -78,7 +78,7 @@ public class Main {
                 .withOutputSize(SignClassification.values().length)
                 .withOutputLayerActivation(Activation.SOFTMAX)
                 .withLearningRate(0.00001)
-                .withNumEpochs(100)
+                .withNumEpochs(350)
                 .withLogFrequency(10);
 
 
